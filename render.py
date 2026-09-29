@@ -39,8 +39,8 @@ def emo(im,ch,cx,cy,s):
     im.paste(t,(int(cx-t.width/2),int(cy-t.height/2)),t)
 def render(D,out):
     im=grad(1080,1350,'#FFFFFF','#EEF3FA');d=ImageDraw.Draw(im)
-    d.text((540,100),D.get('title','HAFTA YULDUZLARI'),font=F(88,True),fill=NAVY,anchor='mm')
-    d.text((540,168),D.get('sub',''),font=F(30),fill=MUT,anchor='mm')
+    d.text((540,155),D.get('title','HAFTA YULDUZLARI'),font=F(88,True),fill=NAVY,anchor='mm')
+    d.text((540,223),D.get('sub',''),font=F(30),fill=MUT,anchor='mm')
     BASE=1040;HH={0:420,1:310,2:230};XS={1:190,0:540,2:890}
     top=D['top']
     for i in (1,0,2):
