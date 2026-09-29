@@ -37,9 +37,12 @@ def emo(im,ch,cx,cy,s):
     t=Image.new('RGBA',(136,128),(0,0,0,0));ImageDraw.Draw(t).text((0,0),ch,font=_ef,embedded_color=True)
     t=t.crop(t.getbbox());r=s/max(t.size);t=t.resize((int(t.width*r),int(t.height*r)),Image.LANCZOS)
     im.paste(t,(int(cx-t.width/2),int(cy-t.height/2)),t)
+def fit(d,txt,size,maxw,bold=True,minsize=18):
+    while size>minsize and d.textlength(txt,font=F(size,bold))>maxw: size-=1
+    return F(size,bold)
 def render(D,out):
     im=grad(1080,1350,'#FFFFFF','#EEF3FA');d=ImageDraw.Draw(im)
-    d.text((540,155),D.get('title','HAFTA YULDUZLARI'),font=F(88,True),fill=NAVY,anchor='mm')
+    d.text((540,155),D.get('title','HAFTA YULDUZLARI'),font=fit(d,D.get('title','HAFTA YULDUZLARI'),88,1000),fill=NAVY,anchor='mm')
     d.text((540,223),D.get('sub',''),font=F(30),fill=MUT,anchor='mm')
     BASE=1040;HH={0:420,1:310,2:230};XS={1:190,0:540,2:890}
     top=D['top']
@@ -48,12 +51,12 @@ def render(D,out):
         block(im,box,*NV[i]);shine(im,box)
         yt=BASE-h
         emo(im,['🥇','🥈','🥉'][i],cx,yt-115,110)
-        d.text((cx,yt-30),t['name'],font=F(36,True),fill=TXT,anchor='mm')
-        d.text((cx,yt+66),t['net'],font=F(58,True),fill='white',anchor='mm')
+        d.text((cx,yt-30),t['name'],font=fit(d,t['name'],36,335),fill=TXT,anchor='mm')
+        d.text((cx,yt+66),t['net'],font=fit(d,t['net'],58,300),fill='white',anchor='mm')
         d.text((cx,yt+122),t['units'],font=F(28),fill='#DCE5F2',anchor='mm')
-        d.text((cx,yt+176),t['bonus'],font=F(34,True),fill=GOLD2,anchor='mm')
+        d.text((cx,yt+176),t['bonus'],font=fit(d,t['bonus'],34,300),fill=GOLD2,anchor='mm')
     d.rectangle((30,BASE,1050,BASE+10),fill=GOLD)
-    txt=D.get('congrats','Tabriklaymiz jamoa!');f=F(66,True);tw=d.textlength(txt,font=f)
+    txt=D.get('congrats','Tabriklaymiz jamoa!');f=fit(d,txt,66,760);tw=d.textlength(txt,font=f)
     d.text((540,1145),txt,font=f,fill=NAVY,anchor='mm')
     emo(im,D.get('el','🎉'),540-tw/2-60,1145,64);emo(im,D.get('er','🔥'),540+tw/2+60,1145,64)
     d.text((540,1207),D.get('note',"Bonuslar oylikka qo'shiladi"),font=F(28),fill=MUT,anchor='mm')
