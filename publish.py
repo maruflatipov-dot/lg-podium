@@ -7,13 +7,14 @@ data.json: {"title","sub","el","er","note"(optional),"top":[{"name","net","units
 """
 import sys,os,json,subprocess,time
 ROOT=os.path.dirname(os.path.abspath(__file__))
-RAW="https://raw.githubusercontent.com/maruflatipov-dot/lg-podium/main/out/%s.png"
+RAW="https://raw.githubusercontent.com/maruflatipov-dot/lg-podium/pics/%s.png"
+TMP=os.path.join(ROOT,".pics")
 def git(*a,check=True):
     r=subprocess.run(['git','-C',ROOT,*a],capture_output=True,text=True)
     if check and r.returncode: raise SystemExit('GIT_ERROR %s: %s'%(' '.join(a),(r.stderr or r.stdout).strip()[-300:]))
     return r
 def ident():
-    git('config','user.email','maruflatipov@gmail.com'); git('config','user.name','LG podium bot')
+    pass
 def push(msg):
     git('commit','-q','-m',msg)
     for i in range(3):
@@ -21,6 +22,25 @@ def push(msg):
         if git('push','-q','origin','HEAD:main',check=False).returncode==0: return
         time.sleep(5)
     raise SystemExit('GIT_ERROR push failed 3 times')
+def pics_push(png,name):
+    # Pictures live ONLY on branch 'pics', which is force-pushed as a single orphan commit each time,
+    # so a picture disappears from the repo (and its history) at cleanup.
+    import shutil
+    shutil.rmtree(TMP,ignore_errors=True); os.makedirs(TMP)
+    g=lambda *a,check=True: _run(['git','-C',TMP,*a],check)
+    g('init','-q'); g('config','user.email','maruflatipov@gmail.com'); g('config','user.name','LG podium bot')
+    if png: shutil.copy(png,os.path.join(TMP,name+'.png'))
+    else: open(os.path.join(TMP,'EMPTY'),'w').write('no pictures\n')
+    g('add','-A'); g('commit','-q','-m','pics')
+    url=git('remote','get-url','origin').stdout.strip()
+    for i in range(3):
+        if g('push','-q','-f',url,'HEAD:pics',check=False).returncode==0: shutil.rmtree(TMP,ignore_errors=True); return
+        time.sleep(5)
+    raise SystemExit('GIT_ERROR force-push to pics failed 3 times')
+def _run(a,check):
+    r=subprocess.run(a,capture_output=True,text=True)
+    if check and r.returncode: raise SystemExit('GIT_ERROR %s: %s'%(' '.join(a[3:]),(r.stderr or r.stdout).strip()[-300:]))
+    return r
 def validate(D):
     top=D.get('top') or []
     if len(top)!=3: raise SystemExit('DATA_ERROR need exactly 3 winners, got %d'%len(top))
@@ -38,12 +58,9 @@ def main():
         from PIL import Image
         im=Image.open(out)
         if im.size!=(1080,1350): raise SystemExit('RENDER_ERROR bad size %s'%(im.size,))
-        git('add','out/%s.png'%name); push('podium '+name)
+        pics_push(out,name)
         print('RAW_URL='+RAW%name+'?v=%d'%int(time.time()))
     elif cmd=='cleanup':
-        name=sys.argv[2]; p='out/%s.png'%name
-        git('pull','-q','--rebase','origin','main',check=False)
-        if not os.path.exists(os.path.join(ROOT,p)): print('CLEANUP_OK (nothing to remove)'); return
-        git('rm','-q',p); push('cleanup '+name); print('CLEANUP_OK')
+        pics_push(None,sys.argv[2]); print('CLEANUP_OK')
     else: raise SystemExit(__doc__)
 if __name__=='__main__': main()
