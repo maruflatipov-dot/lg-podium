@@ -40,21 +40,21 @@ def emo(im,ch,cx,cy,s):
 def fit(d,txt,size,maxw,bold=True,minsize=18):
     while size>minsize and d.textlength(txt,font=F(size,bold))>maxw: size-=1
     return F(size,bold)
-def render(D,out):
+def render(D,out,bg_only=False):
     im=grad(1080,1350,'#FFFFFF','#EEF3FA');d=ImageDraw.Draw(im)
     d.text((540,155),D.get('title','HAFTA YULDUZLARI'),font=fit(d,D.get('title','HAFTA YULDUZLARI'),88,1000),fill=NAVY,anchor='mm')
-    d.text((540,223),D.get('sub',''),font=F(30),fill=MUT,anchor='mm')
+    if not bg_only: d.text((540,223),D.get('sub',''),font=F(30),fill=MUT,anchor='mm')
     BASE=1040;HH={0:420,1:310,2:230};XS={1:190,0:540,2:890}
-    top=D['top']
+    top=D.get('top') or [{}]*3
     for i in (1,0,2):
         cx=XS[i];h=HH[i];t=top[i];box=(cx-165,BASE-h,cx+165,BASE)
         block(im,box,*NV[i]);shine(im,box)
         yt=BASE-h
         emo(im,['🥇','🥈','🥉'][i],cx,yt-115,110)
-        d.text((cx,yt-30),t['name'],font=fit(d,t['name'],36,335),fill=TXT,anchor='mm')
-        d.text((cx,yt+66),t['net'],font=fit(d,t['net'],58,300),fill='white',anchor='mm')
-        d.text((cx,yt+122),t['units'],font=F(28),fill='#DCE5F2',anchor='mm')
-        d.text((cx,yt+176),t['bonus'],font=fit(d,t['bonus'],34,300),fill=GOLD2,anchor='mm')
+        if not bg_only: d.text((cx,yt-30),t['name'],font=fit(d,t['name'],36,335),fill=TXT,anchor='mm')
+        if not bg_only: d.text((cx,yt+66),t['net'],font=fit(d,t['net'],58,300),fill='white',anchor='mm')
+        if not bg_only: d.text((cx,yt+122),t['units'],font=F(28),fill='#DCE5F2',anchor='mm')
+        if not bg_only: d.text((cx,yt+176),t['bonus'],font=fit(d,t['bonus'],34,300),fill=GOLD2,anchor='mm')
     d.rectangle((30,BASE,1050,BASE+10),fill=GOLD)
     txt=D.get('congrats','Tabriklaymiz jamoa!');f=fit(d,txt,66,760);tw=d.textlength(txt,font=f)
     d.text((540,1145),txt,font=f,fill=NAVY,anchor='mm')
